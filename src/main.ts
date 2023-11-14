@@ -21,6 +21,8 @@ export function createEmitter<T extends Events>() {
   function on<E extends Event>(event: E, handler: Handler<T[E]>): () => void
   function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler, handler?: Handler<T[E]>): () => void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
+      globalHandlers.add(globalHandlerOrEvent)
+      
       return () => off(globalHandlerOrEvent)
     }
 

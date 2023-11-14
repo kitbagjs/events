@@ -1,0 +1,28 @@
+{
+  "name": "@kitbag/events",
+  "private": false,
+  "version": "0.0.1",
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "vitest"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/kitbag-events.umd.cjs",
+  "module": "./dist/kitbag-events.js",
+  "types": "./dist/kitbag-events.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/kitbag-events.js",
+      "require": "./dist/kitbag-events.umd.cjs"
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.6.3",
+    "vitest": "^0.34.6"
+  }
+}

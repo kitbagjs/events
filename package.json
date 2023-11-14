@@ -2,6 +2,10 @@
   "name": "@kitbag/events",
   "private": false,
   "version": "0.0.1",
+  "bugs": {
+    "url": "https://github.com/kitbagjs/events/issues"
+  },
+  "homepage": "https://github.com/kitbagjs/events#readme",
   "scripts": {
     "build": "tsc && vite build",
     "test": "vitest"

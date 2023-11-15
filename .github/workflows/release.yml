@@ -13,19 +13,6 @@ jobs:
       contents: write
     
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: nowsprinting/check-version-format-action@v3
-        id: version
+      - uses: kitbagjs/actions-create-release @main
         with:
-          prefix: 'v'
-          
-      - name: Create release
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{steps.version.outputs.full_without_prefix}}" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="Release ${{steps.version.outputs.full_without_prefix}}" \
-              --generate-notes \
-              ${{ steps.version.outputs.is_stable != 'true' && '--prerelease' || '' }}

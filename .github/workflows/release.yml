@@ -1,0 +1,27 @@
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: nowsprinting/check-version-format-action@v3
+        id: version
+        with:
+          prefix: 'v'
+          
+      - name: Create release
+        run: |
+          gh release create "${{github.ref_name}}" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="Release ${{github.ref_name}}" \
+              --generate-notes
+              ${{ steps.version.outputs.is_stable !== 'true' && '--prerelease' || '' }}

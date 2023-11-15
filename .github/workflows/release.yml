@@ -19,6 +19,8 @@ jobs:
           prefix: 'v'
           
       - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{github.ref_name}}" \
               --repo="$GITHUB_REPOSITORY" \

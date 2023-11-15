@@ -24,4 +24,4 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="Release ${{github.ref_name}}" \
               --generate-notes
-              ${{ steps.version.outputs.is_stable !== 'true' && '--prerelease' || '' }}
+              ${{ steps.version.outputs.is_stable != 'true' && '--prerelease' || '' }}

@@ -24,8 +24,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{github.ref_name}}" \
+          gh release create "${{steps.version.outputs.full_without_prefix}}" \
               --repo="$GITHUB_REPOSITORY" \
-              --title="Release ${{github.ref_name}}" \
+              --title="Release ${{steps.version.outputs.full_without_prefix}}" \
               --generate-notes \
               ${{ steps.version.outputs.is_stable != 'true' && '--prerelease' || '' }}

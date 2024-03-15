@@ -3,6 +3,7 @@ import { WorkerMessage } from './worker'
 
 export type EmitterOptions = {
   useSharedWorker?: boolean
+  useBroadcastChannel?: string
 }
 
 type Handler<T = any> = (...payload: T[]) => void
@@ -29,7 +30,15 @@ function getWorker(useSharedWorker: boolean = false): IEventsWorker | null {
   return null
 }
 
-export function createEmitter<T extends Events>({useSharedWorker }: EmitterOptions = {}) {
+function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel | null {
+  if(useBroadcastChannel) {
+    return new BroadcastChannel(useBroadcastChannel)
+  }
+
+  return null
+}
+
+export function createEmitter<T extends Events>({ useSharedWorker, useBroadcastChannel }: EmitterOptions = {}) {
   type Event = keyof T
   type Handlers = Set<Handler>
   type GlobalEventHandler = (event: GlobalEvent<T>) => void
@@ -40,6 +49,16 @@ export function createEmitter<T extends Events>({useSharedWorker }: EmitterOptio
 
   if(worker) {
     worker.port.onmessage = ({ data }) => {
+      const { event, payload } = data
+
+      onEvent(event, payload)
+    }
+  }
+
+  const broadcast = getBroadcastChannel(useBroadcastChannel)
+
+  if(broadcast) {
+    broadcast.onmessage = ({ data }) => {
       const { event, payload } = data
 
       onEvent(event, payload)
@@ -102,6 +121,10 @@ export function createEmitter<T extends Events>({useSharedWorker }: EmitterOptio
     if(worker) {
       worker.port.postMessage({ event, payload })
       return
+    }
+
+    if(broadcast) {
+      broadcast.postMessage({ event, payload })
     }
 
     onEvent(event, payload)

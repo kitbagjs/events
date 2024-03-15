@@ -112,12 +112,30 @@ test('stops calling all handlers when clear is called', () => {
 
 test('events still work when useSharedWorker is set to true', async () => {
   const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>({ useSharedWorker: true })
+  const emitterA = createEmitter<{ hello: void }>({ useSharedWorker: true })
+  const emitterB = createEmitter<{ hello: void }>({ useSharedWorker: true })
 
-  emitter.on('hello', handler)
-  emitter.on(handler)
+  emitterA.on('hello', handler)
+  emitterB.on('hello', handler)
 
-  emitter.emit('hello')
+  emitterA.emit('hello')
+
+  await new Promise<void>(resolve => {
+    setTimeout(() => resolve(), 100)
+  })
+
+  expect(handler).toHaveBeenCalledTimes(2)
+})
+
+test('event handler is called on multiple emitters when using useBroadcastChannel', async () => {
+  const handler = vi.fn()
+  const emitterA = createEmitter<{ hello: void }>({ useBroadcastChannel: 'my-channel' })
+  const emitterB = createEmitter<{ hello: void }>({ useBroadcastChannel: 'my-channel' })
+
+  emitterA.on('hello', handler)
+  emitterB.on('hello', handler)
+
+  emitterA.emit('hello')
 
   await new Promise<void>(resolve => {
     setTimeout(() => resolve(), 10)

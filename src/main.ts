@@ -1,9 +1,5 @@
-import EventsWorker from './worker?sharedworker'
-import { WorkerMessage } from './worker'
-
 export type EmitterOptions = {
-  useSharedWorker?: boolean
-  useBroadcastChannel?: string
+  broadcastChannel?: string
 }
 
 type Handler<T = any> = (...payload: T[]) => void
@@ -17,19 +13,6 @@ type GlobalEvent<T extends Events> = {
   }
 }[keyof T]
 
-interface IEventsWorker extends Omit<SharedWorker, 'postMessage' | 'onmessage'> {
-  postMessage: (message: WorkerMessage) => void,
-  onmessage: (event: MessageEvent<WorkerMessage>) => void,
-}
-
-function getWorker(useSharedWorker: boolean = false): IEventsWorker | null {
-  if(useSharedWorker) {
-    return new EventsWorker() as IEventsWorker
-  }
-
-  return null
-}
-
 function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel | null {
   if(useBroadcastChannel) {
     return new BroadcastChannel(useBroadcastChannel)
@@ -38,23 +21,13 @@ function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel
   return null
 }
 
-export function createEmitter<T extends Events>({ useSharedWorker, useBroadcastChannel }: EmitterOptions = {}) {
+export function createEmitter<T extends Events>({ broadcastChannel: useBroadcastChannel }: EmitterOptions = {}) {
   type Event = keyof T
   type Handlers = Set<Handler>
   type GlobalEventHandler = (event: GlobalEvent<T>) => void
 
   const handlers = new Map<Event, Handlers>()
   const globalHandlers = new Set<GlobalEventHandler>()
-  const worker = getWorker(useSharedWorker)
-
-  if(worker) {
-    worker.port.onmessage = ({ data }) => {
-      const { event, payload } = data
-
-      onEvent(event, payload)
-    }
-  }
-
   const broadcast = getBroadcastChannel(useBroadcastChannel)
 
   if(broadcast) {
@@ -118,11 +91,6 @@ export function createEmitter<T extends Events>({ useSharedWorker, useBroadcastC
   function emit<E extends Event>(event: undefined extends T[E] ? E : never): void
   function emit<E extends Event>(event: E, payload: T[E]): void
   function emit<E extends Event>(event: E, payload?: T[E]): void {
-    if(worker) {
-      worker.port.postMessage({ event, payload })
-      return
-    }
-
     if(broadcast) {
       broadcast.postMessage({ event, payload })
     }

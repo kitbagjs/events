@@ -15,7 +15,4 @@ export default defineConfig({
       rollupTypes: true 
     })
   ],
-  test: {
-    setupFiles: ['@vitest/web-worker'],
-  }
 })

@@ -110,14 +110,18 @@ test('stops calling all handlers when clear is called', () => {
   expect(handler).toHaveBeenCalledTimes(2)
 })
 
-test('events still work when useSharedWorker is set to true', () => {
+test('events still work when useSharedWorker is set to true', async () => {
   const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void}>({ useSharedWorker: true})
+  const emitter = createEmitter<{ hello: void }>({ useSharedWorker: true })
 
   emitter.on('hello', handler)
   emitter.on(handler)
 
   emitter.emit('hello')
+
+  await new Promise<void>(resolve => {
+    setTimeout(() => resolve(), 10)
+  })
 
   expect(handler).toHaveBeenCalledTimes(2)
 })

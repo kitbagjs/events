@@ -1,4 +1,4 @@
-import IEventsWorker from './worker?sharedworker'
+import EventsWorker from './worker?sharedworker'
 import { WorkerMessage } from './worker'
 
 export type EmitterOptions = {
@@ -23,7 +23,7 @@ interface IEventsWorker extends Omit<SharedWorker, 'postMessage' | 'onmessage'> 
 
 function getWorker(useSharedWorker: boolean = false): IEventsWorker | null {
   if(useSharedWorker) {
-    return new IEventsWorker() as IEventsWorker
+    return new EventsWorker() as IEventsWorker
   }
 
   return null
@@ -39,7 +39,7 @@ export function createEmitter<T extends Events>({useSharedWorker }: EmitterOptio
   const worker = getWorker(useSharedWorker)
 
   if(worker) {
-    worker.onmessage = ({ data }) => {
+    worker.port.onmessage = ({ data }) => {
       const { event, payload } = data
 
       onEvent(event, payload)
@@ -100,8 +100,7 @@ export function createEmitter<T extends Events>({useSharedWorker }: EmitterOptio
   function emit<E extends Event>(event: E, payload: T[E]): void
   function emit<E extends Event>(event: E, payload?: T[E]): void {
     if(worker) {
-      console.log(worker)
-      worker.postMessage({ event, payload })
+      worker.port.postMessage({ event, payload })
       return
     }
 

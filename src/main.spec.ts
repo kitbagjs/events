@@ -1,6 +1,12 @@
 import { expect, test, vi } from 'vitest'
 import { createEmitter } from './main'
 
+async function timeout(delay: number = 0): Promise<void> {
+  return new Promise<void>(resolve => {
+    setTimeout(() => resolve(), delay)
+  })
+}
+
 test('calls the handler when an event is emitted', () => {
   const handler = vi.fn()
   const emitter = createEmitter<{ hello: void }>()
@@ -120,9 +126,7 @@ test('event handler is called on multiple emitters when using useBroadcastChanne
 
   emitterA.emit('hello')
 
-  await new Promise<void>(resolve => {
-    setTimeout(() => resolve(), 10)
-  })
+  await timeout()
 
   expect(handler).toHaveBeenCalledTimes(2)
 })

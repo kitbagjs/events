@@ -1,3 +1,10 @@
+import IEventsWorker from './worker?sharedworker'
+import { WorkerMessage } from './worker'
+
+export type EmitterOptions = {
+  useSharedWorker?: boolean
+}
+
 type Handler<T = any> = (...payload: T[]) => void
 
 type Events = Record<string, unknown>
@@ -9,13 +16,35 @@ type GlobalEvent<T extends Events> = {
   }
 }[keyof T]
 
-export function createEmitter<T extends Events>() {
+interface IEventsWorker extends Omit<SharedWorker, 'postMessage' | 'onmessage'> {
+  postMessage: (message: WorkerMessage) => void,
+  onmessage: (event: MessageEvent<WorkerMessage>) => void,
+}
+
+function getWorker(useSharedWorker: boolean = false): IEventsWorker | null {
+  if(useSharedWorker) {
+    return new IEventsWorker() as IEventsWorker
+  }
+
+  return null
+}
+
+export function createEmitter<T extends Events>({useSharedWorker }: EmitterOptions = {}) {
   type Event = keyof T
   type Handlers = Set<Handler>
   type GlobalEventHandler = (event: GlobalEvent<T>) => void
 
   const handlers = new Map<Event, Handlers>()
   const globalHandlers = new Set<GlobalEventHandler>()
+  const worker = getWorker(useSharedWorker)
+
+  if(worker) {
+    worker.onmessage = ({ data }) => {
+      const { event, payload } = data
+
+      onEvent(event, payload)
+    }
+  }
 
   function on(globalEventHandler: GlobalEventHandler): () => void
   function on<E extends Event>(event: E, handler: Handler<T[E]>): () => void
@@ -70,12 +99,13 @@ export function createEmitter<T extends Events>() {
   function emit<E extends Event>(event: undefined extends T[E] ? E : never): void
   function emit<E extends Event>(event: E, payload: T[E]): void
   function emit<E extends Event>(event: E, payload?: T[E]): void {
-    handlers.get(event)?.forEach(handler => handler(payload))
+    if(worker) {
+      console.log(worker)
+      worker.postMessage({ event, payload })
+      return
+    }
 
-    globalHandlers.forEach(handler => handler({
-      kind: event,
-      payload: payload!,
-    }))
+    onEvent(event, payload)
   }
 
   function clear(): void {
@@ -85,6 +115,15 @@ export function createEmitter<T extends Events>() {
 
   function isGlobalEventHandler(value: unknown): value is GlobalEventHandler {
     return typeof value === 'function'
+  }
+
+  function onEvent<E extends Event>(event: E, payload?: T[E]): void {
+    handlers.get(event)?.forEach(handler => handler(payload))
+
+    globalHandlers.forEach(handler => handler({
+      kind: event,
+      payload: payload!,
+    }))
   }
 
   return {

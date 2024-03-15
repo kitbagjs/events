@@ -1,3 +1,7 @@
+export type EmitterOptions = {
+  broadcastChannel?: string
+}
+
 type Handler<T = any> = (...payload: T[]) => void
 
 type Events = Record<string, unknown>
@@ -9,13 +13,30 @@ type GlobalEvent<T extends Events> = {
   }
 }[keyof T]
 
-export function createEmitter<T extends Events>() {
+function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel | null {
+  if(useBroadcastChannel) {
+    return new BroadcastChannel(useBroadcastChannel)
+  }
+
+  return null
+}
+
+export function createEmitter<T extends Events>({ broadcastChannel: useBroadcastChannel }: EmitterOptions = {}) {
   type Event = keyof T
   type Handlers = Set<Handler>
   type GlobalEventHandler = (event: GlobalEvent<T>) => void
 
   const handlers = new Map<Event, Handlers>()
   const globalHandlers = new Set<GlobalEventHandler>()
+  const broadcast = getBroadcastChannel(useBroadcastChannel)
+
+  if(broadcast) {
+    broadcast.onmessage = ({ data }) => {
+      const { event, payload } = data
+
+      onEvent(event, payload)
+    }
+  }
 
   function on(globalEventHandler: GlobalEventHandler): () => void
   function on<E extends Event>(event: E, handler: Handler<T[E]>): () => void
@@ -70,12 +91,11 @@ export function createEmitter<T extends Events>() {
   function emit<E extends Event>(event: undefined extends T[E] ? E : never): void
   function emit<E extends Event>(event: E, payload: T[E]): void
   function emit<E extends Event>(event: E, payload?: T[E]): void {
-    handlers.get(event)?.forEach(handler => handler(payload))
+    if(broadcast) {
+      broadcast.postMessage({ event, payload })
+    }
 
-    globalHandlers.forEach(handler => handler({
-      kind: event,
-      payload: payload!,
-    }))
+    onEvent(event, payload)
   }
 
   function clear(): void {
@@ -85,6 +105,15 @@ export function createEmitter<T extends Events>() {
 
   function isGlobalEventHandler(value: unknown): value is GlobalEventHandler {
     return typeof value === 'function'
+  }
+
+  function onEvent<E extends Event>(event: E, payload?: T[E]): void {
+    handlers.get(event)?.forEach(handler => handler(payload))
+
+    globalHandlers.forEach(handler => handler({
+      kind: event,
+      payload: payload!,
+    }))
   }
 
   return {

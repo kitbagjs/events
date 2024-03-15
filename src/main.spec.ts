@@ -1,6 +1,12 @@
 import { expect, test, vi } from 'vitest'
 import { createEmitter } from './main'
 
+async function timeout(delay: number = 0): Promise<void> {
+  return new Promise<void>(resolve => {
+    setTimeout(() => resolve(), delay)
+  })
+}
+
 test('calls the handler when an event is emitted', () => {
   const handler = vi.fn()
   const emitter = createEmitter<{ hello: void }>()
@@ -106,6 +112,21 @@ test('stops calling all handlers when clear is called', () => {
   emitter.emit('hello')
   emitter.clear()
   emitter.emit('hello')
+
+  expect(handler).toHaveBeenCalledTimes(2)
+})
+
+test('event handler is called on multiple emitters when using useBroadcastChannel', async () => {
+  const handler = vi.fn()
+  const emitterA = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
+  const emitterB = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
+
+  emitterA.on('hello', handler)
+  emitterB.on('hello', handler)
+
+  emitterA.emit('hello')
+
+  await timeout()
 
   expect(handler).toHaveBeenCalledTimes(2)
 })

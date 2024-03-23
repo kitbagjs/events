@@ -23,6 +23,7 @@ function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel
 
 export function createEmitter<T extends Events>({ broadcastChannel: useBroadcastChannel }: EmitterOptions = {}) {
   type Event = keyof T
+  type EventPayload<E extends Event> = T[E]
   type Handlers = Set<Handler>
   type GlobalEventHandler = (event: GlobalEvent<T>) => void
 
@@ -39,8 +40,8 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
   }
 
   function on(globalEventHandler: GlobalEventHandler): () => void
-  function on<E extends Event>(event: E, handler: Handler<T[E]>): () => void
-  function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler, handler?: Handler<T[E]>): () => void {
+  function on<E extends Event>(event: E, handler: Handler<EventPayload<E>>): () => void
+  function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler, handler?: Handler<EventPayload<E>>): () => void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
       globalHandlers.add(globalHandlerOrEvent)
       
@@ -64,8 +65,26 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
     return () => off(event, handler)
   }
 
-  function once<E extends Event>(event: E, handler: Handler<T[E]>): void {
-    const callback: Handler<T[E]> = (args) => {
+  function once(globalEventHandler: GlobalEventHandler): void
+  function once<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
+  function once<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler, handler?: Handler<EventPayload<E>>): void {
+    if (isGlobalEventHandler(globalHandlerOrEvent)) {
+      const callback: GlobalEventHandler = (args) => {
+        off(callback)
+        globalHandlerOrEvent(args)
+      }
+
+      on(callback)
+      return
+    }
+    
+    const event = globalHandlerOrEvent
+
+    if (!handler) {
+      throw new Error(`Handler must be given for ${String(event)} event`)
+    }
+
+    const callback: Handler<EventPayload<E>> = (args) => {
       off(event, callback)
       handler(args)
     }
@@ -74,12 +93,14 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
   }
 
   function off(globalEventHandler: GlobalEventHandler): void
-  function off<E extends Event>(event: E, handler: Handler<T[E]>): void
-  function off<E extends Event>(globalHandlerOrEvent: E, handler?: Handler<T[E]>): void {
+  function off<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
+  function off<E extends Event>(globalHandlerOrEvent: E, handler?: Handler<EventPayload<E>>): void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
       globalHandlers.delete(globalHandlerOrEvent)
       return
     }
+
+    const event = globalHandlerOrEvent
 
     if (!handler) {
       throw new Error(`Handler must be given for ${String(event)} event`)
@@ -88,14 +109,14 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
     handlers.get(globalHandlerOrEvent)?.delete(handler)
   }
 
-  function emit<E extends Event>(event: undefined extends T[E] ? E : never): void
-  function emit<E extends Event>(event: E, payload: T[E]): void
-  function emit<E extends Event>(event: E, payload?: T[E]): void {
+  function emit<E extends Event>(event: undefined extends EventPayload<E> ? E : never): void
+  function emit<E extends Event>(event: E, payload: EventPayload<E>): void
+  function emit<E extends Event>(event: E, payload?: EventPayload<E>): void {
     if(broadcast) {
       broadcast.postMessage({ event, payload })
     }
 
-    onEvent(event, payload)
+    onEvent(event, payload!)
   }
 
   function clear(): void {
@@ -107,12 +128,12 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
     return typeof value === 'function'
   }
 
-  function onEvent<E extends Event>(event: E, payload?: T[E]): void {
+  function onEvent<E extends Event>(event: E, payload: EventPayload<E>): void {
     handlers.get(event)?.forEach(handler => handler(payload))
 
     globalHandlers.forEach(handler => handler({
       kind: event,
-      payload: payload!,
+      payload,
     }))
   }
 

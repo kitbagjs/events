@@ -23,7 +23,7 @@ function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel
 
 export function createEmitter<T extends Events>({ broadcastChannel: useBroadcastChannel }: EmitterOptions = {}) {
   type Event = keyof T
-  type EventPayload<E extends Event> = undefined extends T[E] ? never : T[E]
+  type EventPayload<E extends Event> = T[E]
   type Handlers = Set<Handler>
   type GlobalEventHandler = (event: GlobalEvent<T>) => void
 

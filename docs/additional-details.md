@@ -1,55 +1,6 @@
-# @kitbag/events
+# Additional Details
 
-A simple lightweight event bus written in Typescript.
-
-[![Npm Version](https://img.shields.io/npm/v/@kitbag/events.svg)](https://www.npmjs.org/package/kitbag/events)
-![Github Status](https://github.com/kitbagjs/events/actions/workflows/release.yml/badge.svg)
-[![Zip Size](https://img.badgesize.io/https:/unpkg.com/@kitbag/events/dist/kitbag-events?compression=gzip)](https:/unpkg.com/@kitbag/events/dist/kitbag-events)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/3a65a1e8-f385-444d-a285-4558ab83b5b8/deploy-status)](https://app.netlify.com/sites/kitbag-events/deploys)
-
-Get started with the [documentation](https://kitbag-events.netlify.app/)
-
-## Get Started
-
-### Install
-
-```bash
-# bun
-bun add @kitbag/events
-# yarn
-yarn add @kitbag/events
-# npm
-npm install @kitbag/events
-```
-
-### Create an Emitter
-
-```ts
-import { createEmitter } from '@kitbag/events'
-
-type Events = {
-  hello: 'world'
-}
-
-export const emitter = createEmitter<Events>()
-```
-
-### Add Listeners
-
-```ts
-emitter.on('hello', value => {
-  console.log(value)
-})
-```
-
-### Emit Events
-
-```ts
-emitter.emit('hello', 'world')
-// console logs "world"
-```
-
-## Events
+## Events Type
 
 The `Events` type defines what events can be emitted and their payload.
 
@@ -61,9 +12,7 @@ type Events = {
 }
 ```
 
-## Usage
-
-### Broadcast Channel
+## Broadcast Channel
 
 By default Kitbag Events only emits events within the document. Alternatively, you can configure Events to use a [Broadcast Channel](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) which enables you to broadcast events across different windows, tabs, frames or iframes of the same origin.
 
@@ -75,7 +24,7 @@ const emitter = createEmitter({
 })
 ```
 
-### Single Event Handler
+## Single Event Handler
 
 Define a handler for a single event called "hello"
 
@@ -85,7 +34,7 @@ emitter.on('hello', value => {
 })
 ```
 
-### Global Event Handler
+## Global Event Handler
 
 Every event emitted will trigger this callback
 
@@ -95,7 +44,7 @@ emitter.on(event => {
 })
 ```
 
-### Single Use Handler
+## Single Use Handler
 
 Listen for a single event and then automatically remove the handler
 
@@ -103,7 +52,9 @@ Listen for a single event and then automatically remove the handler
 emitter.once(...)
 ```
 
-### Removing listeners
+## Removing listeners
+
+### Return Value
 
 Emitter.on returns the off method for removing an event handler
 
@@ -111,7 +62,7 @@ Emitter.on returns the off method for removing an event handler
 const off = emitter.on(...)
 ```
 
-Manually remove an event handler
+### Manually remove an event handler
 
 ```ts
 const handler = (value) => console.log(value)
@@ -124,7 +75,7 @@ emitter.off('hello', handler)
 emitter.off(globalHandler)
 ```
 
-Remove all event handlers
+### Remove all event handlers
 
 ```ts
 emitter.clear()

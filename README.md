@@ -5,7 +5,7 @@ A simple lightweight event bus written in Typescript.
 [![Npm Version](https://img.shields.io/npm/v/@kitbag/events.svg)](https://www.npmjs.org/package/kitbag/events)
 ![Github Status](https://github.com/kitbagjs/events/actions/workflows/release.yml/badge.svg)
 [![Zip Size](https://img.badgesize.io/https:/unpkg.com/@kitbag/events/dist/kitbag-events?compression=gzip)](https:/unpkg.com/@kitbag/events/dist/kitbag-events)
-<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/d6033c76-88c3-4963-b24f-7a0bda20f271/deploy-status)](https://app.netlify.com/sites/kitbag-mapper/deploys) -->
+[![Netlify Status](https://api.netlify.com/api/v1/badges/3a65a1e8-f385-444d-a285-4558ab83b5b8/deploy-status)](https://app.netlify.com/sites/kitbag-events/deploys)
 
 Get started with the [documentation](https://kitbag-events.netlify.app/)
 

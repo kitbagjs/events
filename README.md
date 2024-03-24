@@ -1,32 +1,59 @@
 # @kitbag/events
-A simple lightweight event bus written in Typescript. 
+
+A simple lightweight event bus written in Typescript.
+
+[![Npm Version](https://img.shields.io/npm/v/@kitbag/events.svg)](https://www.npmjs.org/package/kitbag/events)
+![Github Status](https://github.com/kitbagjs/events/actions/workflows/release.yml/badge.svg)
+[![Zip Size](https://img.badgesize.io/https:/unpkg.com/@kitbag/events/dist/kitbag-events?compression=gzip)](https:/unpkg.com/@kitbag/events/dist/kitbag-events)
+<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/d6033c76-88c3-4963-b24f-7a0bda20f271/deploy-status)](https://app.netlify.com/sites/kitbag-mapper/deploys) -->
+
+Get started with the [documentation](https://kitbag-events.netlify.app/)
 
 ## Get Started
-```
-npm i --save @kitbag/events
+
+### Install
+
+```bash
+# bun
+bun add @kitbag/events
+# yarn
+yarn add @kitbag/events
+# npm
+npm install @kitbag/events
 ```
 
-Create an emitter
-```typescript
+### Create an Emitter
+
+```ts
 import { createEmitter } from '@kitbag/events'
 
 type Events = {
   hello: 'world'
 }
 
-const emitter = createEmitter<Events>()
+export const emitter = createEmitter<Events>()
+```
 
+### Add Listeners
+
+```ts
 emitter.on('hello', value => {
-  console.log(value) // "world"
+  console.log(value)
 })
+```
 
+### Emit Events
+
+```ts
 emitter.emit('hello', 'world')
+// console logs "world"
 ```
 
 ## Events
+
 The `Events` type defines what events can be emitted and their payload.
 
-```typescript
+```ts
 type Events = {
   ping: 'pong',
   userCreated: User,
@@ -35,33 +62,58 @@ type Events = {
 ```
 
 ## Usage
-```typescript
 
+### Broadcast Channel
+
+By default Kitbag Events only emits events within the document. Alternatively, you can configure Events to use a [Broadcast Channel](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) which enables you to broadcast events across different windows, tabs, frames or iframes of the same origin.
+
+```ts
 import { createEmitter } from '@kitbag/events'
 
-type Events = {
-  hello: 'world'
-}
-
-const emitter = createEmitter<Events>()
-
-// define a global event handler. Every event emitted will trigger this callback
-emitter.on(event => {
-  console.log(event) // { kind: 'hello', payload: 'world' }
+const emitter = createEmitter({
+  broadcastChannel: 'MyChannelName'
 })
+```
 
-// define a handler for a single event called "hello"
+### Single Event Handler
+
+Define a handler for a single event called "hello"
+
+```ts
 emitter.on('hello', value => {
   console.log(value) // "world"
 })
+```
 
-// listen for a single event and then automatically remove the handler
+### Global Event Handler
+
+Every event emitted will trigger this callback
+
+```ts
+emitter.on(event => {
+  console.log(event) // { kind: 'hello', payload: 'world' }
+})
+```
+
+### Single Use Handler
+
+Listen for a single event and then automatically remove the handler
+
+```ts
 emitter.once(...)
+```
 
-// emitter.on returns the off method for removing an event handler
+### Removing listeners
+
+Emitter.on returns the off method for removing an event handler
+
+```ts
 const off = emitter.on(...)
+```
 
-// manually remove an event handler
+Manually remove an event handler
+
+```ts
 const handler = (value) => console.log(value)
 const globalHandler = (event) => console.log(event)
 
@@ -70,6 +122,10 @@ emitter.on(globalHandler)
 
 emitter.off('hello', handler)
 emitter.off(globalHandler)
+```
 
-// remove all event handlers
+Remove all event handlers
+
+```ts
 emitter.clear()
+```

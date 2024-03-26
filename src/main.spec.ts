@@ -144,17 +144,27 @@ describe('when clear is called', () => {
 
 describe('when using useBroadcastChannel', () => {
   test('event handler is called on multiple emitters', async () => {
+    const broadcastChannel = 'my-channel'
+    const channel = new BroadcastChannel(broadcastChannel)
     const handlerA = vi.fn()
     const handlerB = vi.fn()
-    const emitterA = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
-    const emitterB = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
+    const emitterA = createEmitter<{ hello: void }>({ broadcastChannel })
+    const emitterB = createEmitter<{ hello: void }>({ broadcastChannel })
 
     emitterA.on('hello', handlerA)
     emitterB.on('hello', handlerB)
 
+    const channelReceivedMessage = new Promise<void>(resolve => {
+      channel.addEventListener('message', (message) => {
+        if(message.data.event === 'hello'){
+          setTimeout(() => resolve())
+        }
+      })
+    })
+    
     emitterA.emit('hello')
-
-    await timeout()
+    
+    await channelReceivedMessage
 
     expect(handlerB).toHaveBeenCalledOnce()
   })

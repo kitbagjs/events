@@ -75,7 +75,19 @@ emitter.off('hello', handler)
 emitter.off(globalHandler)
 ```
 
-### Remove all event handlers
+### Remove all handlers for a given event
+
+```ts
+const handler1 = (value) => console.log(value)
+const handler2 = (value) => console.log(value)
+
+emitter.on('hello', handler1)
+emitter.on('hello', handler2)
+
+emitter.off('hello')
+```
+
+### Remove all handlers for all events
 
 ```ts
 emitter.clear()

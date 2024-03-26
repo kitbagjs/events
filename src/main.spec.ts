@@ -1,4 +1,4 @@
-import { expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { createEmitter } from './main'
 
 async function timeout(delay: number = 0): Promise<void> {
@@ -21,11 +21,12 @@ test('calls the handler when an event is emitted', () => {
 
 test('calls global handler when any event is emitted', () => {
   const handler = vi.fn()
-  const emitter = createEmitter<{ 
+  const emitter = createEmitter<{
     hello: void,
     goodbye: void,
   }>()
 
+  emitter.on(handler)
   emitter.on(handler)
 
   emitter.emit('hello')
@@ -34,99 +35,127 @@ test('calls global handler when any event is emitted', () => {
   expect(handler).toBeCalledTimes(2)
 })
 
-test('calls the handler one time when once is used', () => {
-  const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>()
+describe('when once is used', () => {
+  test('calls the handler one time', () => {
+    const handler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
 
-  emitter.once('hello', handler)
+    emitter.once('hello', handler)
 
-  emitter.emit('hello')
-  emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.emit('hello')
 
-  expect(handler).toHaveBeenCalledOnce()
+    expect(handler).toHaveBeenCalledOnce()
+  })
 })
 
-test('stops calling the handler when off is called', () => {
-  const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>()
+describe('when off is called', () => {
+  test('stops calling the handler', () => {
+    const handler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
 
-  emitter.on('hello', handler)
+    emitter.on('hello', handler)
 
-  emitter.emit('hello')
-  emitter.emit('hello')
-  emitter.off('hello', handler)
-  emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.off('hello', handler)
+    emitter.emit('hello')
 
-  expect(handler).toHaveBeenCalledTimes(2)
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
+
+  test('stops calling global handler', () => {
+    const handler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.on(handler)
+
+    emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.off(handler)
+    emitter.emit('hello')
+
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
+
+  test('given event without handler, removes all', () => {
+    const handlerA = vi.fn()
+    const handlerB = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.on('hello', handlerA)
+    emitter.on('hello', handlerB)
+
+    emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.off('hello')
+    emitter.emit('hello')
+
+    expect(handlerA).toHaveBeenCalledTimes(2)
+    expect(handlerB).toHaveBeenCalledTimes(2)
+  })
 })
 
-test('stops calling global handler when off is called', () => {
-  const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>()
+describe('when returned off is called', () => {
+  test('stops calling the handler', () => {
+    const handler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
 
-  emitter.on(handler)
+    const off = emitter.on('hello', handler)
 
-  emitter.emit('hello')
-  emitter.emit('hello')
-  emitter.off(handler)
-  emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.emit('hello')
+    off()
+    emitter.emit('hello')
 
-  expect(handler).toHaveBeenCalledTimes(2)
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
+
+  test('stops calling global handler', () => {
+    const handler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    const off = emitter.on(handler)
+
+    emitter.emit('hello')
+    emitter.emit('hello')
+    off()
+    emitter.emit('hello')
+
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
 })
 
-test('stops calling the handler when returned off is called', () => {
-  const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>()
+describe('when clear is called', () => {
+  test('stops calling all handlers', () => {
+    const handler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
 
-  const off = emitter.on('hello', handler)
+    emitter.on('hello', handler)
+    emitter.on(handler)
 
-  emitter.emit('hello')
-  emitter.emit('hello')
-  off()
-  emitter.emit('hello')
+    emitter.emit('hello')
+    emitter.clear()
+    emitter.emit('hello')
 
-  expect(handler).toHaveBeenCalledTimes(2)
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
 })
 
-test('stops calling global handler when returned off is called', () => {
-  const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>()
+describe('when using useBroadcastChannel', () => {
+  test('event handler is called on multiple emitters', async () => {
+    const handlerA = vi.fn()
+    const handlerB = vi.fn()
+    const emitterA = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
+    const emitterB = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
 
-  const off = emitter.on(handler)
+    emitterA.on('hello', handlerA)
+    emitterB.on('hello', handlerB)
 
-  emitter.emit('hello')
-  emitter.emit('hello')
-  off()
-  emitter.emit('hello')
+    emitterA.emit('hello')
 
-  expect(handler).toHaveBeenCalledTimes(2)
-})
+    await timeout()
 
-test('stops calling all handlers when clear is called', () => {
-  const handler = vi.fn()
-  const emitter = createEmitter<{ hello: void }>()
-
-  emitter.on('hello', handler)
-  emitter.on(handler)
-
-  emitter.emit('hello')
-  emitter.clear()
-  emitter.emit('hello')
-
-  expect(handler).toHaveBeenCalledTimes(2)
-})
-
-test('event handler is called on multiple emitters when using useBroadcastChannel', async () => {
-  const handler = vi.fn()
-  const emitterA = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
-  const emitterB = createEmitter<{ hello: void }>({ broadcastChannel: 'my-channel' })
-
-  emitterA.on('hello', handler)
-  emitterB.on('hello', handler)
-
-  emitterA.emit('hello')
-
-  await timeout()
-
-  expect(handler).toHaveBeenCalledTimes(2)
+    expect(handlerB).toHaveBeenCalledOnce()
+  })
 })

@@ -1,12 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 import { createEmitter } from './main'
 
-async function timeout(delay: number = 0): Promise<void> {
-  return new Promise<void>(resolve => {
-    setTimeout(() => resolve(), delay)
-  })
-}
-
 test('calls the handler when an event is emitted', () => {
   const handler = vi.fn()
   const emitter = createEmitter<{ hello: void }>()

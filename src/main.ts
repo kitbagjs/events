@@ -106,8 +106,10 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
 
     if (handler) {
       eventHandlers?.delete(handler)
-    } else {
-      eventHandlers?.clear()
+      return
+    }
+    
+    eventHandlers?.clear()
     }
   }
 

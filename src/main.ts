@@ -110,7 +110,6 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
     }
     
     eventHandlers?.clear()
-    }
   }
 
   function emit<E extends Event>(event: undefined extends EventPayload<E> ? E : never): void

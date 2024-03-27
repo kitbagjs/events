@@ -93,6 +93,7 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
   }
 
   function off(globalEventHandler: GlobalEventHandler): void
+  function off<E extends Event>(event: E): void
   function off<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
   function off<E extends Event>(globalHandlerOrEvent: E, handler?: Handler<EventPayload<E>>): void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
@@ -101,12 +102,14 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
     }
 
     const event = globalHandlerOrEvent
+    const eventHandlers = handlers.get(event)
 
-    if (!handler) {
-      throw new Error(`Handler must be given for ${String(event)} event`)
+    if (handler) {
+      eventHandlers?.delete(handler)
+      return
     }
-
-    handlers.get(globalHandlerOrEvent)?.delete(handler)
+    
+    eventHandlers?.clear()
   }
 
   function emit<E extends Event>(event: undefined extends EventPayload<E> ? E : never): void

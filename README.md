@@ -2,7 +2,7 @@
 
 A simple lightweight event bus written in Typescript.
 
-[![Npm Version](https://img.shields.io/npm/v/@kitbag/events.svg)](https://www.npmjs.org/package/kitbag/events)
+[![Npm Version](https://img.shields.io/npm/v/@kitbag/events.svg)](https://www.npmjs.org/package/@kitbag/events)
 ![Github Status](https://github.com/kitbagjs/events/actions/workflows/release.yml/badge.svg)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/d7cd83b9-2172-4c52-a029-32551b99974e/deploy-status)](https://app.netlify.com/sites/kitbag-events/deploys)
 

@@ -2,15 +2,16 @@
 
 A simple lightweight event bus written in Typescript.
 
-[![Npm Version](https://img.shields.io/npm/v/@kitbag/events.svg)](https://www.npmjs.org/package/@kitbag/events)
-![Github Status](https://github.com/kitbagjs/events/actions/workflows/release.yml/badge.svg)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/d7cd83b9-2172-4c52-a029-32551b99974e/deploy-status)](https://app.netlify.com/sites/kitbag-events/deploys)
+[![NPM Version][npm-badge]][npm-url]
+[![GitHub Status][github-badge]][github-url]
+[![Netlify Status][netlify-badge]][netlify-url]
+[![Discord chat][discord-badge]][discord-url]
+
+## Getting Started
 
 Get started with the [documentation](https://kitbag-events.netlify.app/)
 
-## Get Started
-
-### Install
+### Installation
 
 ```bash
 # bun
@@ -140,3 +141,12 @@ Remove all handlers for all events
 ```ts
 emitter.clear()
 ```
+
+[npm-badge]: https://img.shields.io/npm/v/@kitbag/events.svg
+[npm-url]: https://www.npmjs.org/package/@kitbag/events
+[github-badge]: https://github.com/kitbagjs/events/actions/workflows/release.yml/badge.svg
+[github-url]: https://github.com/kitbagjs/events/actions/workflows/release.yml
+[netlify-badge]: https://api.netlify.com/api/v1/badges/d7cd83b9-2172-4c52-a029-32551b99974e/deploy-status
+[netlify-url]: https://app.netlify.com/sites/kitbag-events/deploys
+[discord-badge]: https://img.shields.io/discord/1079625926024900739?logo=discord&label=Discord
+[discord-url]: https://discord.gg/UT7JrAxU

@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: "Kitbag Events | Simple and versatile mapping utility for Typescript",
-  description: "A simple and versatile mapping utility for Typescript",
+  title: "Kitbag Events | Simple lightweight event bus written in Typescript.",
+  description: "A simple lightweight event bus written in Typescript.",
   head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
   themeConfig: {
     logo: '/kitbag-logo-circle.svg',

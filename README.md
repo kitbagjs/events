@@ -149,4 +149,4 @@ emitter.clear()
 [netlify-badge]: https://api.netlify.com/api/v1/badges/d7cd83b9-2172-4c52-a029-32551b99974e/deploy-status
 [netlify-url]: https://app.netlify.com/sites/kitbag-events/deploys
 [discord-badge]: https://img.shields.io/discord/1079625926024900739?logo=discord&label=Discord
-[discord-url]: https://discord.gg/UT7JrAxU
+[discord-url]: https://discord.gg/zw7dpcc5HV

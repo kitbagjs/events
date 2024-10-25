@@ -13,6 +13,10 @@ type GlobalEvent<T extends Events> = {
   }
 }[keyof T]
 
+type EmitterState = {
+  channel?: BroadcastChannel | null
+}
+
 function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel | null {
   if(useBroadcastChannel) {
     return new BroadcastChannel(useBroadcastChannel)
@@ -21,7 +25,7 @@ function getBroadcastChannel(useBroadcastChannel: string = ''): BroadcastChannel
   return null
 }
 
-export function createEmitter<T extends Events>({ broadcastChannel: useBroadcastChannel }: EmitterOptions = {}) {
+export function createEmitter<T extends Events>(options?: EmitterOptions) {
   type Event = keyof T
   type EventPayload<E extends Event> = T[E]
   type Handlers = Set<Handler>
@@ -29,14 +33,26 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
 
   const handlers = new Map<Event, Handlers>()
   const globalHandlers = new Set<GlobalEventHandler>()
-  const broadcast = getBroadcastChannel(useBroadcastChannel)
+  const state: EmitterState = {}
 
-  if(broadcast) {
-    broadcast.onmessage = ({ data }) => {
-      const { event, payload } = data
+  if(options) {
+    setOptions(options)
+  }
 
-      onEvent(event, payload)
+  function setOptions(options: EmitterOptions): void {
+    const channel = getBroadcastChannel(options.broadcastChannel)
+
+    if(channel) {
+      channel.onmessage = onBroadcastChannelMessage
     }
+    
+    state.channel = channel
+  }
+
+  function onBroadcastChannelMessage({data}: MessageEvent) {
+    const { event, payload } = data
+
+    onEvent(event, payload)
   }
 
   function on(globalEventHandler: GlobalEventHandler): () => void
@@ -115,9 +131,7 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
   function emit<E extends Event>(event: undefined extends EventPayload<E> ? E : never): void
   function emit<E extends Event>(event: E, payload: EventPayload<E>): void
   function emit<E extends Event>(event: E, payload?: EventPayload<E>): void {
-    if(broadcast) {
-      broadcast.postMessage({ event, payload })
-    }
+    state.channel?.postMessage({ event, payload })
 
     onEvent(event, payload!)
   }
@@ -146,5 +160,6 @@ export function createEmitter<T extends Events>({ broadcastChannel: useBroadcast
     once,
     emit,
     clear,
+    setOptions,
   }
 }

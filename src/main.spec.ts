@@ -1,6 +1,12 @@
 import { describe, expect, test, vi } from 'vitest'
 import { createEmitter } from './main'
 
+async function timeout(delay: number = 0): Promise<void> {
+  return new Promise<void>(resolve => {
+    setTimeout(() => resolve(), delay)
+  })
+}
+
 test('calls the handler when an event is emitted', () => {
   const handler = vi.fn()
   const emitter = createEmitter<{ hello: void }>()
@@ -162,4 +168,41 @@ describe('when using useBroadcastChannel', () => {
 
     expect(handlerB).toHaveBeenCalledOnce()
   })
+})
+
+test('broadcast channel can be set after emitter is created', async () => {
+  const emitter = createEmitter<{ hello: void}>()
+  
+  const handlerA = vi.fn()
+  const channelA = new BroadcastChannel('ChannelA')
+  channelA.onmessage = handlerA
+
+  const handlerB = vi.fn()
+  const channelB = new BroadcastChannel('ChannelB')
+  channelB.onmessage = handlerB
+
+  emitter.emit('hello')
+
+  await timeout()
+
+  expect(handlerA).not.toHaveBeenCalled()
+  expect(handlerB).not.toHaveBeenCalled()
+
+  emitter.setOptions({ broadcastChannel: 'ChannelA' })
+
+  emitter.emit('hello')
+
+  await timeout()
+
+  expect(handlerA).toHaveBeenCalledOnce()
+  expect(handlerB).not.toHaveBeenCalled()
+
+  emitter.setOptions({ broadcastChannel: 'ChannelB' })
+
+  emitter.emit('hello')
+
+  await timeout()
+
+  expect(handlerA).toHaveBeenCalledOnce()
+  expect(handlerB).toHaveBeenCalledOnce()
 })

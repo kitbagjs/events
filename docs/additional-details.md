@@ -24,6 +24,8 @@ const emitter = createEmitter({
 })
 ```
 
+You can also set/change the broadcast channel after creating an emitter by using `emitter.setOptions({ broadcastChannel: 'MyChannelName '})`
+
 ## Single Event Handler
 
 Define a handler for a single event called "hello"

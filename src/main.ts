@@ -6,7 +6,9 @@ type Handler<T = any> = (...payload: T[]) => void
 
 type Events = Record<string, unknown>
 
-type GlobalEvent<T extends Events> = {
+export type GlobalEventHandler<T extends Events> = (event: GlobalEvent<T>) => void
+
+export type GlobalEvent<T extends Events> = {
   [K in keyof T]: {
     kind: K,
     payload: T[K],
@@ -29,10 +31,9 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
   type Event = keyof T
   type EventPayload<E extends Event> = T[E]
   type Handlers = Set<Handler>
-  type GlobalEventHandler = (event: GlobalEvent<T>) => void
 
   const handlers = new Map<Event, Handlers>()
-  const globalHandlers = new Set<GlobalEventHandler>()
+  const globalHandlers = new Set<GlobalEventHandler<T>>()
   const state: EmitterState = {}
 
   if(options) {
@@ -55,9 +56,9 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     onEvent(event, payload)
   }
 
-  function on(globalEventHandler: GlobalEventHandler): () => void
+  function on(globalEventHandler: GlobalEventHandler<T>): () => void
   function on<E extends Event>(event: E, handler: Handler<EventPayload<E>>): () => void
-  function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler, handler?: Handler<EventPayload<E>>): () => void {
+  function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler<T>, handler?: Handler<EventPayload<E>>): () => void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
       globalHandlers.add(globalHandlerOrEvent)
       
@@ -81,11 +82,11 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     return () => off(event, handler)
   }
 
-  function once(globalEventHandler: GlobalEventHandler): void
+  function once(globalEventHandler: GlobalEventHandler<T>): void
   function once<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
-  function once<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler, handler?: Handler<EventPayload<E>>): void {
+  function once<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler<T>, handler?: Handler<EventPayload<E>>): void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
-      const callback: GlobalEventHandler = (args) => {
+      const callback: GlobalEventHandler<T> = (args) => {
         off(callback)
         globalHandlerOrEvent(args)
       }
@@ -108,7 +109,7 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     on(event, callback)
   }
 
-  function off(globalEventHandler: GlobalEventHandler): void
+  function off(globalEventHandler: GlobalEventHandler<T>): void
   function off<E extends Event>(event: E): void
   function off<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
   function off<E extends Event>(globalHandlerOrEvent: E, handler?: Handler<EventPayload<E>>): void {
@@ -141,7 +142,7 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     globalHandlers.clear()
   }
 
-  function isGlobalEventHandler(value: unknown): value is GlobalEventHandler {
+  function isGlobalEventHandler(value: unknown): value is GlobalEventHandler<T> {
     return typeof value === 'function'
   }
 

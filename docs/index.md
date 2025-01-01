@@ -9,6 +9,9 @@ hero:
     - theme: brand
       text: Get Started
       link: /getting-started
+    - theme: alt
+      text: Additional Details
+      link: /additional-details
 
 features:
   - title: Simple

@@ -229,3 +229,15 @@ test('next with event returns the event payload', async () => {
 
   await expect(event).resolves.toEqual('world')
 })
+
+test('next with timeout rejects if the event is not emitted', async () => {
+  vi.useFakeTimers()
+  const emitter = createEmitter()
+
+  await expect(() => {
+    const payload = emitter.next({ timeout: 100 })
+    vi.advanceTimersByTime(100)
+
+    return payload
+  }).rejects.toThrowError('Timeout waiting for global event after 100ms')
+})

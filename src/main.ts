@@ -15,6 +15,16 @@ export type GlobalEvent<T extends Events> = {
   }
 }[keyof T]
 
+export type NextOptions = {
+  timeout?: number
+}
+
+export class EmitterTimeoutError extends Error {
+  constructor(event: string, timeout: number) {
+    super(`Timeout waiting for ${event} event after ${timeout}ms`)
+  }
+}
+
 type EmitterState = {
   channel?: BroadcastChannel | null
 }
@@ -109,17 +119,32 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     on(event, callback)
   }
 
-  function next(): Promise<GlobalEvent<T>>
-  function next<E extends Event>(event: E): Promise<EventPayload<E>>
-  function next<E extends Event>(event?: E): Promise<GlobalEvent<T> |EventPayload<E>> {
+  function next(options?: NextOptions): Promise<GlobalEvent<T>>
+  function next<E extends Event>(event: E, options?: NextOptions): Promise<EventPayload<E>>
+  function next<E extends Event>(eventOrOptions?: E | NextOptions, options?: NextOptions): Promise<GlobalEvent<T> |EventPayload<E>> {
+    const event = typeof eventOrOptions === 'string' ? eventOrOptions : undefined
+    const { timeout } = typeof eventOrOptions === 'object' ? eventOrOptions : options ?? {}
+
     if(event) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         once(event, resolve)
+
+        if(timeout) {
+          setTimeout(() => {
+            reject(new EmitterTimeoutError(event, timeout))
+          }, timeout)
+        }
       })
     }
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       once(resolve)
+
+      if(timeout) {
+        setTimeout(() => {
+          reject(new EmitterTimeoutError('global', timeout))
+        }, timeout)
+      }
     })
   }
 

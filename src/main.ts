@@ -208,9 +208,11 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
 
     globalHandlers.add(globalEventHandler)
 
-    signal?.addEventListener('abort', () => off(globalEventHandler))
+    const offHandler = () => off(globalEventHandler)
 
-    return () => off(globalEventHandler)
+    signal?.addEventListener('abort', offHandler)
+
+    return offHandler
   }
 
   function addEventHandler<E extends Event>(event: E, handler: Handler<EventPayload<E>>, options?: EmitterOnOptions): () => void {

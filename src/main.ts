@@ -109,6 +109,20 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     on(event, callback)
   }
 
+  function next(): Promise<GlobalEvent<T>>
+  function next<E extends Event>(event: E): Promise<EventPayload<E>>
+  function next<E extends Event>(event?: E): Promise<GlobalEvent<T> |EventPayload<E>> {
+    if(event) {
+      return new Promise((resolve) => {
+        once(event, resolve)
+      })
+    }
+
+    return new Promise((resolve) => {
+      once(resolve)
+    })
+  }
+
   function off(globalEventHandler: GlobalEventHandler<T>): void
   function off<E extends Event>(event: E): void
   function off<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
@@ -159,6 +173,7 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     on,
     off,
     once,
+    next,
     emit,
     clear,
     setOptions,

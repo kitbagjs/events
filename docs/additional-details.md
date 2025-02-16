@@ -54,6 +54,26 @@ Listen for a single event and then automatically remove the handler
 emitter.once(...)
 ```
 
+## Waiting for an event
+
+Wait for an event to be emitted and get the payload using the `next` method. 
+
+```ts
+const payload = await emitter.next() // Wait for any event
+const payload = await emitter.next('hello') // Wait for the hello event
+```
+
+You can also pass an options object to the `next` method to set a timeout.
+
+```ts
+const payload = await emitter.next({ timeout: 1000 }) // Wait for any event with a timeout of 1 second
+const payload = await emitter.next('hello', { timeout: 1000 }) // Wait for the hello event with a timeout of 1 second
+```
+
+:::info
+If the event is not emitted before the timeout, the `next` method will reject with an `EmitterTimeoutError`.
+:::
+
 ## Removing listeners
 
 ### Return Value

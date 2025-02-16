@@ -206,3 +206,38 @@ test('broadcast channel can be set after emitter is created', async () => {
   expect(handlerA).toHaveBeenCalledOnce()
   expect(handlerB).toHaveBeenCalledOnce()
 })
+
+test('next without event returns the global event payload', async () => {
+  const emitter = createEmitter<{ hello: string }>()
+
+  const event = emitter.next()
+
+  emitter.emit('hello', 'world')
+
+  await expect(event).resolves.toEqual({
+    kind: 'hello',
+    payload: 'world',
+  })
+})
+
+test('next with event returns the event payload', async () => {
+  const emitter = createEmitter<{ hello: string }>()
+
+  const event = emitter.next('hello')
+
+  emitter.emit('hello', 'world')
+
+  await expect(event).resolves.toEqual('world')
+})
+
+test('next with timeout rejects if the event is not emitted', async () => {
+  vi.useFakeTimers()
+  const emitter = createEmitter()
+
+  await expect(() => {
+    const payload = emitter.next({ timeout: 100 })
+    vi.advanceTimersByTime(100)
+
+    return payload
+  }).rejects.toThrowError('Timeout waiting for global event after 100ms')
+})

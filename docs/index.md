@@ -19,7 +19,7 @@ features:
   - title: Type safety
     details: Type safe events and payload
   - title: Useful API
-    details: Includes on, off, once, emit, and clear
+    details: Includes on, off, once, next, emit, and clear
   - title: Support Global Handlers
     details: Setup handlers that run on all events
 ---

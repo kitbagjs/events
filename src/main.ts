@@ -19,6 +19,14 @@ export type NextOptions = {
   timeout?: number
 }
 
+export type EmitterOnOptions = {
+  signal?: AbortSignal
+}
+
+export type EmitterOnceOptions = {
+  signal?: AbortSignal
+}
+
 export class EmitterTimeoutError extends Error {
   constructor(event: string, timeout: number) {
     super(`Timeout waiting for ${event} event after ${timeout}ms`)
@@ -66,46 +74,43 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
     onEvent(event, payload)
   }
 
-  function on(globalEventHandler: GlobalEventHandler<T>): () => void
-  function on<E extends Event>(event: E, handler: Handler<EventPayload<E>>): () => void
-  function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler<T>, handler?: Handler<EventPayload<E>>): () => void {
+  function on(globalEventHandler: GlobalEventHandler<T>, options?: EmitterOnOptions): () => void
+  function on<E extends Event>(event: E, handler: Handler<EventPayload<E>>, options?: EmitterOnOptions): () => void
+  function on<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler<T>, handlerOrOptions?: Handler<EventPayload<E>> | EmitterOnOptions, options?: EmitterOnOptions): () => void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
-      globalHandlers.add(globalHandlerOrEvent)
-      
-      return () => off(globalHandlerOrEvent)
+      const globalHandlerOptions = typeof handlerOrOptions === 'object' ? handlerOrOptions : {}
+
+      return addGlobalHandler(globalHandlerOrEvent, globalHandlerOptions)
     }
 
+    const handler = typeof handlerOrOptions === 'function' ? handlerOrOptions : undefined
     const event = globalHandlerOrEvent
+    const handlerOptions = options ?? {}
 
     if (!handler) {
       throw new Error(`Handler must be given for ${String(event)} event`)
     }
 
-    const existing = handlers.get(event)
-
-    if (existing) {
-      existing.add(handler)
-    } else {
-      handlers.set(event, new Set([handler]))
-    }
-
-    return () => off(event, handler)
+    return addEventHandler(event, handler, handlerOptions)
   }
 
-  function once(globalEventHandler: GlobalEventHandler<T>): void
-  function once<E extends Event>(event: E, handler: Handler<EventPayload<E>>): void
-  function once<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler<T>, handler?: Handler<EventPayload<E>>): void {
+  function once(globalEventHandler: GlobalEventHandler<T>, options?: EmitterOnceOptions): () => void
+  function once<E extends Event>(event: E, handler: Handler<EventPayload<E>>, options?: EmitterOnceOptions): () => void
+  function once<E extends Event>(globalHandlerOrEvent: E | GlobalEventHandler<T>, handlerOrOptions?: Handler<EventPayload<E>> | EmitterOnceOptions, options?: EmitterOnceOptions): () => void {
     if (isGlobalEventHandler(globalHandlerOrEvent)) {
+      const globalHandlerOptions = typeof handlerOrOptions === 'object' ? handlerOrOptions : {}
+
       const callback: GlobalEventHandler<T> = (args) => {
         off(callback)
         globalHandlerOrEvent(args)
       }
 
-      on(callback)
-      return
+      return addGlobalHandler(callback, globalHandlerOptions)
     }
-    
+
     const event = globalHandlerOrEvent
+    const handler = typeof handlerOrOptions === 'function' ? handlerOrOptions : undefined
+    const handlerOptions = options ?? {}
 
     if (!handler) {
       throw new Error(`Handler must be given for ${String(event)} event`)
@@ -116,7 +121,7 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
       handler(args)
     }
 
-    on(event, callback)
+    return addEventHandler(event, callback, handlerOptions)
   }
 
   function next(options?: NextOptions): Promise<GlobalEvent<T>>
@@ -192,6 +197,42 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
       kind: event,
       payload,
     }))
+  }
+
+  function addGlobalHandler(globalEventHandler: GlobalEventHandler<T>, options?: EmitterOnOptions): () => void {
+    const { signal } = options ?? {}
+
+    if(signal?.aborted) {
+      return () => {}
+    }
+
+    globalHandlers.add(globalEventHandler)
+
+    signal?.addEventListener('abort', () => off(globalEventHandler))
+
+    return () => off(globalEventHandler)
+  }
+
+  function addEventHandler<E extends Event>(event: E, handler: Handler<EventPayload<E>>, options?: EmitterOnOptions): () => void {
+    const { signal } = options ?? {}
+
+    if(signal?.aborted) {
+      return () => {}
+    }
+
+    const existing = handlers.get(event)
+
+    if (existing) {
+      existing.add(handler)
+    } else {
+      handlers.set(event, new Set([handler]))
+    }
+
+    if(signal) {
+      signal.addEventListener('abort', () => off(event, handler))
+    }
+
+    return () => off(event, handler)
   }
 
   return {

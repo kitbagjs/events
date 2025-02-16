@@ -230,11 +230,11 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
       handlers.set(event, new Set([handler]))
     }
 
-    if(signal) {
-      signal.addEventListener('abort', () => off(event, handler))
-    }
+    const offHandler = () => off(event, handler)
 
-    return () => off(event, handler)
+    signal?.addEventListener('abort', offHandler)
+
+    return offHandler
   }
 
   return {

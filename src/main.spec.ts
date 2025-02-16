@@ -35,17 +35,171 @@ test('calls global handler when any event is emitted', () => {
   expect(handler).toBeCalledTimes(2)
 })
 
+describe('when on is used', () => {
+  test('calls the handler each time', () => {
+    const eventHandler = vi.fn()
+    const globalHandler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.on('hello', eventHandler)
+    emitter.on(globalHandler)
+
+    expect(eventHandler).toHaveBeenCalledTimes(0)
+    expect(globalHandler).toHaveBeenCalledTimes(0)
+
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledTimes(1)
+    expect(globalHandler).toHaveBeenCalledTimes(1)
+
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledTimes(2)
+    expect(globalHandler).toHaveBeenCalledTimes(2)
+  })
+
+  test('does not call the handler if it is removed', () => {
+    const eventHandler = vi.fn()
+    const globalHandler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    const offEvent = emitter.on('hello', eventHandler)
+    const offGlobal = emitter.on(globalHandler)
+
+    offEvent()
+    offGlobal()
+
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledTimes(0)
+    expect(globalHandler).toHaveBeenCalledTimes(0)
+  })
+
+  test('does not call the handler after it is removed', () => {
+    const eventHandler = vi.fn()
+    const globalHandler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    const offEvent = emitter.on('hello', eventHandler)
+    const offGlobal = emitter.on(globalHandler)
+
+    emitter.emit('hello')
+    
+    offEvent()
+    offGlobal()
+
+    emitter.emit('hello')
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledTimes(1)
+    expect(globalHandler).toHaveBeenCalledTimes(1)
+  })
+
+  test('does not call the handler if signal is aborted', () => {
+    const eventHandler = vi.fn()
+    const globalHandler = vi.fn()
+    const controller = new AbortController()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.on('hello', eventHandler, { signal: controller.signal })
+    emitter.on(globalHandler, { signal: controller.signal })
+
+    controller.abort()
+    
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledTimes(0)
+    expect(globalHandler).toHaveBeenCalledTimes(0)
+  })
+
+  test('does not call the handler after signal is aborted', () => {
+    const eventHandler = vi.fn()
+    const globalHandler = vi.fn()
+    const controller = new AbortController()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.on('hello', eventHandler, { signal: controller.signal })
+    emitter.on(globalHandler, { signal: controller.signal })
+
+    emitter.emit('hello')
+    
+    controller.abort()
+    
+    emitter.emit('hello')
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledTimes(1)
+    expect(globalHandler).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('when once is used', () => {
   test('calls the handler one time', () => {
+    const eventHandler = vi.fn()
+    const globalHandler = vi.fn()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.once('hello', eventHandler)
+    emitter.once(globalHandler)
+
+    emitter.emit('hello')
+    emitter.emit('hello')
+
+    expect(eventHandler).toHaveBeenCalledOnce()
+    expect(globalHandler).toHaveBeenCalledOnce()
+  })
+
+  test('does not call the handler if it is removed', () => {
     const handler = vi.fn()
     const emitter = createEmitter<{ hello: void }>()
 
-    emitter.once('hello', handler)
+    const off = emitter.once('hello', handler)
+
+    off()
 
     emitter.emit('hello')
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  test('does not call the handler if signal is aborted', () => {
+    const handler = vi.fn()
+    const controller = new AbortController()
+    const emitter = createEmitter<{ hello: void }>()
+
+    emitter.once('hello', handler, { signal: controller.signal })
+
+    controller.abort()
+
     emitter.emit('hello')
 
-    expect(handler).toHaveBeenCalledOnce()
+    expect(handler).not.toHaveBeenCalled()
+  })
+})
+
+describe('when next is used', () => {
+  test('returns the event payload', async () => {
+    const emitter = createEmitter<{ hello: string }>()
+
+    const event = emitter.next('hello')
+
+    emitter.emit('hello', 'world')
+
+    await expect(event).resolves.toEqual('world')
+  })
+
+  test('when timeout is used, rejects if the event is not emitted', async () => {
+    vi.useFakeTimers()
+    const emitter = createEmitter()
+
+    await expect(() => {
+      const payload = emitter.next({ timeout: 100 })
+      vi.advanceTimersByTime(100)
+
+      return payload
+    }).rejects.toThrowError('Timeout waiting for global event after 100ms')
+
+    vi.useRealTimers()
   })
 })
 
@@ -218,26 +372,4 @@ test('next without event returns the global event payload', async () => {
     kind: 'hello',
     payload: 'world',
   })
-})
-
-test('next with event returns the event payload', async () => {
-  const emitter = createEmitter<{ hello: string }>()
-
-  const event = emitter.next('hello')
-
-  emitter.emit('hello', 'world')
-
-  await expect(event).resolves.toEqual('world')
-})
-
-test('next with timeout rejects if the event is not emitted', async () => {
-  vi.useFakeTimers()
-  const emitter = createEmitter()
-
-  await expect(() => {
-    const payload = emitter.next({ timeout: 100 })
-    vi.advanceTimersByTime(100)
-
-    return payload
-  }).rejects.toThrowError('Timeout waiting for global event after 100ms')
 })

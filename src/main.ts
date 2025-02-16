@@ -222,13 +222,11 @@ export function createEmitter<T extends Events>(options?: EmitterOptions) {
       return () => {}
     }
 
-    const existing = handlers.get(event)
-
-    if (existing) {
-      existing.add(handler)
-    } else {
-      handlers.set(event, new Set([handler]))
+    if(!handlers.has(event)){
+      handlers.set(event, new Set())
     }
+    
+    handlers.get(event)?.add(handler)
 
     const offHandler = () => off(event, handler)
 

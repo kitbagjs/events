@@ -1,6 +1,7 @@
 export type { 
   EmitterOptions,
   EmitterEvents,
+  EventPayload,
   EventHandler,
   GlobalEventHandler,
   EmitterOnOptions,

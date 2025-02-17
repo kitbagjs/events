@@ -12,3 +12,4 @@ dist
 *.local
 
 docs/.vitepress/cache
+tsconfig.vitest-temp.json

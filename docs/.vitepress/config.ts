@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import typedocSidebar from '../api/typedoc-sidebar.json';
 
 export default defineConfig({
   title: "Kitbag Events | Simple lightweight event bus written in Typescript.",
@@ -8,15 +9,22 @@ export default defineConfig({
     logo: '/kitbag-logo-circle.svg',
     siteTitle: 'Kitbag Events',
 
+    editLink: {
+      pattern: 'https://github.com/kitbagjs/events/edit/main/docs/:path',
+      text: 'Suggest changes to this page',
+    },
+
+    nav: [
+      { text: 'Guide', link: '/getting-started' },
+      { text: 'API', link: '/api/index' }
+    ],
+
+    search: {
+      provider: 'local'
+    },
+
     sidebar: {
-      '/api/': [
-        {
-          text: 'packages',
-          items: [
-            { text: '@kitbag/events', link: '/api/modules/kitbag' },
-          ],
-        },
-      ],
+      '/api/': typedocSidebar,
       '/': [
         {
           text: 'Guide',

@@ -12,7 +12,8 @@
     "types": "tsc --noEmit",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "docs:generate": "vite build && typedoc && sleep 5 && node ./scripts/api.js"
   },
   "type": "module",
   "files": [
@@ -28,6 +29,9 @@
     }
   },
   "devDependencies": {
+    "typedoc": "^0.27.7",
+    "typedoc-plugin-markdown": "^4.4.2",
+    "typedoc-vitepress-theme": "^1.1.2",
     "typescript": "^5.0.2",
     "vite": "^6.1.0",
     "vite-plugin-dts": "^4.5.0",

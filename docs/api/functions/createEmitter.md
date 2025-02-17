@@ -46,7 +46,7 @@ emit: <E>(event) => void<E>(event, payload) => void;
 
 | Parameter | Type |
 | ------ | ------ |
-| `event` | `undefined` *extends* `EventPayload`\<`TEvents`, `E`\> ? `E` : `never` |
+| `event` | `undefined` *extends* [`EventPayload`](../types/EventPayload.md)\<`TEvents`, `E`\> ? `E` : `never` |
 
 #### Returns
 
@@ -63,7 +63,7 @@ emit: <E>(event) => void<E>(event, payload) => void;
 | Parameter | Type |
 | ------ | ------ |
 | `event` | `E` |
-| `payload` | `EventPayload`\<`TEvents`, `E`\> |
+| `payload` | [`EventPayload`](../types/EventPayload.md)\<`TEvents`, `E`\> |
 
 #### Returns
 
@@ -100,7 +100,7 @@ next: (options?) => Promise<GlobalEventHandlerResponse<TEvents>><E>(event, optio
 
 #### Returns
 
-`Promise`\<`EventPayload`\<`TEvents`, `E`\>\>
+`Promise`\<[`EventPayload`](../types/EventPayload.md)\<`TEvents`, `E`\>\>
 
 ### off()
 
@@ -145,7 +145,7 @@ off: (globalEventHandler) => void<E>(event) => void<E>(event, handler) => void;
 | Parameter | Type |
 | ------ | ------ |
 | `event` | `E` |
-| `handler` | [`EventHandler`](../types/EventHandler.md)\<`EventPayload`\<`TEvents`, `E`\>\> |
+| `handler` | [`EventHandler`](../types/EventHandler.md)\<[`EventPayload`](../types/EventPayload.md)\<`TEvents`, `E`\>\> |
 
 #### Returns
 
@@ -183,7 +183,7 @@ on: (globalEventHandler, options?) => () => void<E>(event, handler, options?) =>
 | Parameter | Type |
 | ------ | ------ |
 | `event` | `E` |
-| `handler` | [`EventHandler`](../types/EventHandler.md)\<`EventPayload`\<`TEvents`, `E`\>\> |
+| `handler` | [`EventHandler`](../types/EventHandler.md)\<[`EventPayload`](../types/EventPayload.md)\<`TEvents`, `E`\>\> |
 | `options`? | [`EmitterOnOptions`](../types/EmitterOnOptions.md) |
 
 #### Returns
@@ -226,7 +226,7 @@ once: (globalEventHandler, options?) => () => void<E>(event, handler, options?) 
 | Parameter | Type |
 | ------ | ------ |
 | `event` | `E` |
-| `handler` | [`EventHandler`](../types/EventHandler.md)\<`EventPayload`\<`TEvents`, `E`\>\> |
+| `handler` | [`EventHandler`](../types/EventHandler.md)\<[`EventPayload`](../types/EventPayload.md)\<`TEvents`, `E`\>\> |
 | `options`? | [`EmitterOnceOptions`](../types/EmitterOnceOptions.md) |
 
 #### Returns

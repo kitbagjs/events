@@ -1,9 +1,5 @@
 # @kitbag/events
 
-## Errors
-
-- [EmitterTimeoutError](errors/EmitterTimeoutError.md)
-
 ## Functions
 
 - [createEmitter](functions/createEmitter.md)
@@ -16,5 +12,10 @@
 - [EmitterOnOptions](types/EmitterOnOptions.md)
 - [EmitterOptions](types/EmitterOptions.md)
 - [EventHandler](types/EventHandler.md)
+- [EventPayload](types/EventPayload.md)
 - [GlobalEventHandler](types/GlobalEventHandler.md)
 - [GlobalEventHandlerResponse](types/GlobalEventHandlerResponse.md)
+
+## Errors
+
+- [EmitterTimeoutError](errors/EmitterTimeoutError.md)

@@ -1,15 +1,5 @@
 [
   {
-    "text": "Errors",
-    "collapsed": true,
-    "items": [
-      {
-        "text": "EmitterTimeoutError",
-        "link": "/api/errors/EmitterTimeoutError.md"
-      }
-    ]
-  },
-  {
     "text": "Functions",
     "collapsed": true,
     "items": [
@@ -48,12 +38,26 @@
         "link": "/api/types/EventHandler.md"
       },
       {
+        "text": "EventPayload",
+        "link": "/api/types/EventPayload.md"
+      },
+      {
         "text": "GlobalEventHandler",
         "link": "/api/types/GlobalEventHandler.md"
       },
       {
         "text": "GlobalEventHandlerResponse",
         "link": "/api/types/GlobalEventHandlerResponse.md"
+      }
+    ]
+  },
+  {
+    "text": "Errors",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "EmitterTimeoutError",
+        "link": "/api/errors/EmitterTimeoutError.md"
       }
     ]
   }

@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { createEmitter } from './main'
+import { createEmitter } from '../src/main'
 
 async function timeout(delay: number = 0): Promise<void> {
   return new Promise<void>(resolve => {

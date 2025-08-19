@@ -24,6 +24,6 @@ features:
     details: on, off, once, next, emit, count, clear, and global handlers
   - title: Abort Support
     details: Automatic cleanup with AbortSignal integration
-  - title: Promise Based
+  - title: Promise Support
     details: Async event waiting with timeout support
 

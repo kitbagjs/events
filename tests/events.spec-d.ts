@@ -198,3 +198,32 @@ describe('emitter.setOptions', () => {
     expectTypeOf<Source>().toEqualTypeOf<Expected>()
   })
 })
+
+describe('emitter.count', () => {
+  test('has the correct return type', () => {
+    const emitter = createEmitter<Events>()
+    const response = emitter.count()
+
+    type Source = typeof response
+    type Expected = number
+
+    expectTypeOf<Source>().toEqualTypeOf<Expected>()
+  })
+
+  test('accepts only valid event names', () => {
+    const emitter = createEmitter<Events>()
+
+    emitter.count('ping')
+    emitter.count('hello')
+    emitter.count('user')
+
+    // @ts-expect-error - Invalid event name
+    emitter.count('invalid')
+  })
+
+  test('accepts a global option', () => {
+    const emitter = createEmitter<Events>()
+
+    emitter.count('ping', { global: true })
+  })
+})

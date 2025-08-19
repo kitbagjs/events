@@ -373,3 +373,21 @@ test('next without event returns the global event payload', async () => {
     payload: 'world',
   })
 })
+
+describe('emitter.count', () => {
+  test('returns the correct number of handlers', () => {
+    const emitter = createEmitter<{ hello: void, goodbye: void }>()
+
+    emitter.on('hello', vi.fn())
+    emitter.on('goodbye', vi.fn())
+    emitter.on(vi.fn())
+
+    expect(emitter.count()).toBe(1)
+    expect(emitter.count('hello')).toBe(1)
+    expect(emitter.count('goodbye')).toBe(1)
+    expect(emitter.count('hello', { global: true })).toBe(2)
+    expect(emitter.count('goodbye', { global: true })).toBe(2)
+    expect(emitter.count('hello', { global: false })).toBe(1)
+    expect(emitter.count('goodbye', { global: false })).toBe(1)
+  })
+})

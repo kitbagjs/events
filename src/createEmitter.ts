@@ -149,6 +149,26 @@ export function createEmitter<TEvents extends EmitterEvents>(options?: EmitterOp
     onEvent(event, payload!)
   }
 
+  type CountOptions = {
+    global?: boolean
+  }
+
+  function count<E extends TEvent>(): number
+  function count<E extends TEvent>(event: E, options?: CountOptions): number
+  function count<E extends TEvent>(event?: E, { global = false }: CountOptions = {}): number {
+    if(event) {
+      const eventHandlers = handlers.get(event)?.size ?? 0
+
+      if(global) {
+        return eventHandlers + globalHandlers.size
+      }
+
+      return eventHandlers
+    }
+
+    return globalHandlers.size
+  }
+
   function clear(): void {
     handlers.clear()
     globalHandlers.clear()
@@ -210,6 +230,7 @@ export function createEmitter<TEvents extends EmitterEvents>(options?: EmitterOp
     next,
     emit,
     clear,
+    count,
     setOptions,
   }
 }

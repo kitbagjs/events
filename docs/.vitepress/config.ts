@@ -34,8 +34,12 @@ export default defineConfig({
               link: '/getting-started'
             },
             {
-              text: 'Additional Details',
-              link: '/additional-details'
+              text: 'Methods',
+              link: '/methods'
+            },
+            {
+              text: 'Broadcasting Events',
+              link: '/broadcasting-events'
             }
           ]
         },

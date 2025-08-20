@@ -30,6 +30,40 @@ clear: () => void;
 
 `void`
 
+### count()
+
+```ts
+count: <E>() => number<E>(event, options?) => number;
+```
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `E` *extends* `string` \| `number` \| `symbol` |
+
+#### Returns
+
+`number`
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `E` *extends* `string` \| `number` \| `symbol` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `event` | `E` |
+| `options`? | \{ `global`: `boolean`; \} |
+| `options.global`? | `boolean` |
+
+#### Returns
+
+`number`
+
 ### emit()
 
 ```ts
